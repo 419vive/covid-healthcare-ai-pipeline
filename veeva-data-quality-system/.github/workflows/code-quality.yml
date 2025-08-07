@@ -1,0 +1,182 @@
+name: Code Quality and Standards
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-quality-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-quality-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pylint radon complexity-report
+
+      - name: Run pylint analysis
+        run: |
+          pylint python/ tests/ --output-format=json:pylint-report.json,text:pylint-report.txt || true
+
+      - name: Calculate code complexity
+        run: |
+          radon cc python/ --json > complexity-report.json
+          radon mi python/ --json > maintainability-report.json
+
+      - name: Generate code quality summary
+        run: |
+          echo "## Code Quality Report" > code-quality-summary.md
+          echo "" >> code-quality-summary.md
+          echo "### Pylint Score" >> code-quality-summary.md
+          PYLINT_SCORE=$(tail -n 2 pylint-report.txt | head -n 1 | grep -oE '[0-9]+\.[0-9]+' | head -n 1)
+          echo "Score: $PYLINT_SCORE/10" >> code-quality-summary.md
+          echo "" >> code-quality-summary.md
+          echo "### Complexity Metrics" >> code-quality-summary.md
+          echo "\`\`\`" >> code-quality-summary.md
+          radon cc python/ -s >> code-quality-summary.md
+          echo "\`\`\`" >> code-quality-summary.md
+
+      - name: Upload quality reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-quality-reports
+          path: |
+            pylint-report.json
+            pylint-report.txt
+            complexity-report.json
+            maintainability-report.json
+            code-quality-summary.md
+
+      - name: Comment PR with quality report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const summary = fs.readFileSync('code-quality-summary.md', 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            } catch (error) {
+              console.log('Could not post code quality summary:', error);
+            }
+
+  documentation-check:
+    name: Documentation Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pydocstyle sphinx sphinx-rtd-theme
+
+      - name: Check docstring coverage
+        run: |
+          python -c "
+          import ast
+          import os
+          
+          def check_docstrings(directory):
+              total_functions = 0
+              documented_functions = 0
+              
+              for root, dirs, files in os.walk(directory):
+                  for file in files:
+                      if file.endswith('.py'):
+                          filepath = os.path.join(root, file)
+                          try:
+                              with open(filepath, 'r') as f:
+                                  tree = ast.parse(f.read())
+                              
+                              for node in ast.walk(tree):
+                                  if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                                      if not node.name.startswith('_'):
+                                          total_functions += 1
+                                          if ast.get_docstring(node):
+                                              documented_functions += 1
+                          except Exception as e:
+                              print(f'Error parsing {filepath}: {e}')
+              
+              return total_functions, documented_functions
+          
+          total, documented = check_docstrings('python')
+          coverage = (documented / total * 100) if total > 0 else 0
+          print(f'Docstring Coverage: {documented}/{total} ({coverage:.1f}%)')
+          
+          if coverage < 70:
+              print('WARNING: Docstring coverage is below 70%')
+              exit(1)
+          "
+
+      - name: Run pydocstyle
+        run: |
+          pydocstyle python/ --count --convention=numpy || true
+
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Run dependency audit
+        run: |
+          pip-audit --requirement requirements.txt --format=json --output=dependency-audit.json || true
+
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-audit-report
+          path: dependency-audit.json

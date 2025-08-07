@@ -1,0 +1,3 @@
+Additional target tables will be added as time goes on.  Likewise, you can expect the target tables that we currently have to eventually have more rows and fewer missing values.  The format of the tables (such as the name and number of columns) should stay the same.
+
+If new target tables are added very close to the challenge deadline you are free to use these new tables for reference, but we will not be requiring that participants also generate their own versions of these same new tables.  Participants are only required to generate (a subset of) the tables that are listed in the relevant task descriptions.

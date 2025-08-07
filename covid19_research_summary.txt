@@ -1,0 +1,68 @@
+COVID-19 RESEARCH DATA ANALYSIS SUMMARY REPORT
+============================================================
+
+Analysis Date: 2025-08-07 23:08:13
+Total Categories Analyzed: 8
+
+CATEGORY BREAKDOWN
+------------------------------
+
+Population Management:
+  • Research Tables: 6
+  • Total Records: 236
+  • Top Study Type: Expert Review (106 studies)
+
+Relevant Factors:
+  • Research Tables: 11
+  • Total Records: 547
+  • Top Study Type: Modeling Study (153 studies)
+
+Patient Descriptions:
+  • Research Tables: 8
+  • Total Records: 222
+  • Top Study Type: Case series (42 studies)
+
+Models and Open Questions:
+  • Research Tables: 8
+  • Total Records: 196
+  • Top Study Type: Simulation (61 studies)
+
+Materials Research:
+  • Research Tables: 9
+  • Total Records: 117
+  • Top Study Type: Review (17 studies)
+
+Diagnostics:
+  • Research Tables: 3
+  • Total Records: 165
+  • Top Study Type: Investigative Study (75 studies)
+
+Therapeutics & Clinical Studies:
+  • Research Tables: 2
+  • Total Records: 54
+  • Top Study Type: Prospective Observational Study (11 studies)
+
+Risk Factors:
+  • Research Tables: 28
+  • Total Records: 1001
+  • Top Study Type: Retrospective observational study (784 studies)
+
+
+KEY FINDINGS
+--------------------
+
+1. Most Researched Area:
+   Category: Risk Factors
+   Total Records: 1001
+   Significance: This category has the highest volume of research data, indicating significant scientific interest and investment.
+
+2. Dominant Study Type:
+   Study Type: Retrospective observational study
+   Count: 836
+   Significance: This represents the most common research methodology used in COVID-19 studies, accounting for 836 studies.
+
+3. Research Timeline:
+   Earliest Study: 2002-05-25
+   Latest Study: 2020-06-30
+   Time Span Days: 6611
+   Significance: Shows the temporal span of research efforts and research momentum over time.

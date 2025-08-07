@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  veeva-dq-app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: veeva-data-quality-system
+    restart: unless-stopped
+    env_file:
+      - .env.${VEEVA_ENV:-production}.local
+    environment:
+      # Override specific variables if needed
+      - BUILD_ID=${BUILD_ID:-latest}
+      - DEPLOYMENT_DATE=${DEPLOYMENT_DATE}
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-2.0}'
+          memory: ${MEMORY_LIMIT:-4g}
+        reservations:
+          cpus: '${CPU_RESERVATION:-1.0}'
+          memory: ${MEMORY_RESERVATION:-2g}
+    volumes:
+      # Persistent data storage
+      - veeva_data:/app/data
+      - veeva_logs:/app/logs
+      - veeva_reports:/app/reports
+      - veeva_config:/app/config
+      # Backup storage
+      - ./backups:/app/backups:ro
+    networks:
+      - veeva-network
+    healthcheck:
+      test: ["CMD", "python", "python/main.py", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Monitoring with Prometheus metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: veeva-prometheus
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - veeva-network
+    profiles:
+      - monitoring
+
+  # Optional: Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: veeva-grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=${GRAFANA_ENABLE_ANONYMOUS:-false}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - veeva-network
+    profiles:
+      - monitoring
+
+volumes:
+  veeva_data:
+    driver: local
+  veeva_logs:
+    driver: local
+  veeva_reports:
+    driver: local
+  veeva_config:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  veeva-network:
+    driver: bridge

@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veeva-dq-config
+  namespace: veeva-dq-system
+  labels:
+    app.kubernetes.io/name: veeva-data-quality-system
+    app.kubernetes.io/component: config
+data:
+  # Application configuration
+  VEEVA_ENV: "production"
+  VEEVA_LOG_LEVEL: "INFO"
+  VEEVA_DB_ECHO: "false"
+  VEEVA_DB_POOL_SIZE: "10"
+  VEEVA_DB_MAX_OVERFLOW: "20"
+  VEEVA_DB_POOL_TIMEOUT: "30"
+  
+  # Performance settings
+  VEEVA_PARALLEL_QUERIES: "true"
+  VEEVA_MAX_WORKERS: "4"
+  VEEVA_QUERY_TIMEOUT: "300"
+  
+  # Monitoring settings
+  VEEVA_METRICS_ENABLED: "true"
+  VEEVA_HEALTH_CHECK_INTERVAL: "30"
+  
+  # Alert thresholds
+  VEEVA_ALERT_THRESHOLD_CPU: "80"
+  VEEVA_ALERT_THRESHOLD_MEMORY: "85"
+  VEEVA_ALERT_THRESHOLD_DISK: "90"
+  
+  # Security settings
+  VEEVA_SECURE_LOGS: "true"
+  VEEVA_MASK_SENSITIVE_DATA: "true"
+  
+  # Timezone
+  TZ: "UTC"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veeva-dq-scripts
+  namespace: veeva-dq-system
+  labels:
+    app.kubernetes.io/name: veeva-data-quality-system
+    app.kubernetes.io/component: scripts
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Starting Veeva Data Quality System..."
+    
+    # Wait for database to be ready
+    while [[ ! -f /app/data/database/veeva_opendata.db ]]; do
+      echo "Waiting for database..."
+      sleep 5
+    done
+    
+    # Run health check
+    python python/main.py status
+    
+    # Start application
+    exec "$@"
+  
+  health-check.sh: |
+    #!/bin/bash
+    # Kubernetes health check script
+    python python/main.py status > /dev/null 2>&1
+    exit $?

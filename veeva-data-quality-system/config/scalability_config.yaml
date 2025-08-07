@@ -1,0 +1,377 @@
+# Veeva Data Quality System - Scalability Configuration
+# Architectural configuration for handling 10M+ records
+
+# Database Configuration
+database:
+  # Primary database settings
+  primary:
+    type: "postgresql"  # sqlite, postgresql, mysql
+    host: "${DB_HOST:localhost}"
+    port: "${DB_PORT:5432}"
+    database: "${DB_NAME:veeva_data_quality}"
+    username: "${DB_USER:veeva_user}"
+    password: "${DB_PASSWORD}"
+    
+    # Connection pooling
+    connection_pool_size: 20
+    max_overflow: 40
+    pool_timeout: 30
+    
+    # Performance tuning
+    query_timeout: 300
+    enable_query_logging: false
+    
+  # Read replicas for scaling read operations
+  read_replicas:
+    - "postgresql://readonly_user:${READONLY_PASSWORD}@replica1.example.com:5432/veeva_data_quality"
+    - "postgresql://readonly_user:${READONLY_PASSWORD}@replica2.example.com:5432/veeva_data_quality"
+  
+  # Sharding configuration (for future use)
+  sharding:
+    enabled: false
+    strategy: "hash"  # hash, range, directory
+    shard_key: "provider_id"
+    shards:
+      - name: "shard_01"
+        connection: "postgresql://user:pass@shard1.example.com:5432/veeva_shard_01"
+        hash_range: [0, 1000000]
+      - name: "shard_02"  
+        connection: "postgresql://user:pass@shard2.example.com:5432/veeva_shard_02"
+        hash_range: [1000001, 2000000]
+
+# Caching Configuration
+cache:
+  # Redis configuration
+  redis:
+    enabled: true
+    host: "${REDIS_HOST:localhost}"
+    port: "${REDIS_PORT:6379}"
+    db: 0
+    password: "${REDIS_PASSWORD}"
+    connection_pool_size: 10
+    
+    # Cache TTL settings (in seconds)
+    query_results_ttl: 3600      # 1 hour
+    validation_results_ttl: 7200 # 2 hours
+    metadata_ttl: 86400          # 24 hours
+    
+  # In-memory cache settings
+  memory_cache:
+    max_size: 1000               # Maximum cached items
+    ttl: 300                     # 5 minutes
+    
+  # Multi-level caching strategy
+  strategy:
+    query_cache: true
+    result_cache: true
+    object_cache: true
+    cache_warming: true
+    
+    # Cache warming configuration
+    warming:
+      enabled: true
+      priority_queries:
+        - "npi_validation"
+        - "provider_name_inconsistency" 
+        - "critical_data_issues"
+      schedule: "0 */6 * * *"      # Every 6 hours
+
+# API Configuration
+api:
+  # Server settings
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    default_limit: "1000/hour"
+    authenticated_limit: "10000/hour"
+    admin_limit: "50000/hour"
+    
+    # Per-endpoint limits
+    endpoints:
+      "/api/v1/validation/validate": "50/hour"
+      "/api/v1/validation/jobs": "20/hour"
+      "/api/v1/monitoring/stats": "200/hour"
+  
+  # Authentication
+  authentication:
+    enabled: true
+    jwt_secret: "${JWT_SECRET}"
+    jwt_expiry: 3600              # 1 hour
+    refresh_token_expiry: 604800  # 7 days
+    
+  # CORS settings
+  cors:
+    enabled: true
+    origins: ["*"]
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+    
+  # Response compression
+  compression:
+    enabled: true
+    minimum_size: 1000
+    compression_level: 6
+
+# Message Queue Configuration
+message_queue:
+  # Redis-based message queue
+  redis:
+    url: "redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}/1"
+    
+  # Queue settings
+  queues:
+    validation_jobs:
+      priority_levels: 3
+      max_retries: 3
+      retry_delay: [2, 4, 8]      # Exponential backoff
+      dead_letter_queue: true
+      
+    data_imports:
+      priority_levels: 2
+      max_retries: 5
+      retry_delay: [5, 10, 20, 40, 80]
+      
+  # Consumer settings
+  consumers:
+    validation_worker:
+      queue: "validation_jobs"
+      concurrency: 8
+      prefetch_count: 2
+      
+    import_worker:
+      queue: "data_imports"
+      concurrency: 4
+      prefetch_count: 1
+
+# Performance Configuration
+performance:
+  # Query execution
+  query_execution:
+    max_workers: 8               # Async query workers
+    timeout: 300                 # Query timeout in seconds
+    batch_size: 10000           # Records per batch
+    parallel_execution: true
+    
+    # Connection management
+    max_concurrent_queries: 50
+    connection_pool_size: 20
+    
+  # Caching performance
+  caching:
+    cache_hit_target: 85         # Target cache hit rate %
+    cache_size_limit: "2GB"
+    eviction_policy: "lru"
+    
+  # Memory management
+  memory:
+    max_memory_usage: "4GB"
+    gc_optimization: true
+    dataframe_memory_limit: "1GB"
+
+# Microservices Configuration
+microservices:
+  # Service discovery
+  service_discovery:
+    enabled: false               # Enable when transitioning to microservices
+    registry_type: "consul"     # consul, etcd, redis
+    registry_url: "consul://localhost:8500"
+    
+  # Circuit breaker configuration
+  circuit_breakers:
+    enabled: true
+    default_config:
+      failure_threshold: 5
+      recovery_timeout: 60
+      success_threshold: 3
+      timeout: 30
+      sliding_window_size: 100
+      
+    services:
+      database:
+        failure_threshold: 10
+        recovery_timeout: 30
+        
+      cache:
+        failure_threshold: 3
+        recovery_timeout: 10
+        
+      external_api:
+        failure_threshold: 5
+        recovery_timeout: 120
+  
+  # Health checks
+  health_checks:
+    enabled: true
+    interval: 30                 # Health check interval in seconds
+    timeout: 10                  # Health check timeout
+    healthy_threshold: 2
+    unhealthy_threshold: 3
+
+# Monitoring and Observability
+monitoring:
+  # Metrics collection
+  metrics:
+    enabled: true
+    collection_interval: 30      # seconds
+    retention_period: "7d"      # 7 days
+    
+    # Prometheus integration
+    prometheus:
+      enabled: false
+      endpoint: "/metrics"
+      port: 9090
+      
+  # Logging configuration
+  logging:
+    level: "INFO"
+    format: "json"               # json, text
+    structured: true
+    
+    # Log destinations
+    destinations:
+      - type: "file"
+        path: "logs/veeva_dq.log"
+        max_size: "100MB"
+        backup_count: 5
+        
+      - type: "elasticsearch"    # Optional
+        enabled: false
+        host: "elasticsearch:9200"
+        index: "veeva-logs"
+        
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - type: "webhook"
+        url: "${ALERT_WEBHOOK_URL}"
+        
+    rules:
+      - name: "high_error_rate"
+        condition: "error_rate > 5%"
+        severity: "critical"
+        
+      - name: "low_cache_hit_rate"
+        condition: "cache_hit_rate < 70%"
+        severity: "warning"
+        
+      - name: "database_connection_issues"
+        condition: "db_connection_errors > 10"
+        severity: "critical"
+
+# Data Quality Configuration
+data_quality:
+  # Validation rules
+  validation_rules:
+    # Critical rules (always enabled)
+    npi_validation:
+      enabled: true
+      severity: "CRITICAL"
+      cache_results: true
+      
+    provider_name_inconsistency:
+      enabled: true
+      severity: "HIGH"
+      cache_results: true
+      
+    address_validation:
+      enabled: true
+      severity: "MEDIUM"
+      cache_results: true
+      
+    # Performance thresholds for rules
+    thresholds:
+      max_execution_time: 300    # seconds
+      max_memory_usage: "500MB"
+      
+  # Data processing
+  processing:
+    chunk_size: 50000            # Records per processing chunk
+    parallel_chunks: true
+    max_parallel_chunks: 4
+    
+  # Results management
+  results:
+    retention_period: "30d"      # Keep results for 30 days
+    compression: true
+    export_formats: ["xlsx", "csv", "json"]
+    max_export_size: "100MB"
+
+# Security Configuration
+security:
+  # API Security
+  api_security:
+    rate_limiting: true
+    request_validation: true
+    response_sanitization: true
+    
+  # Database security
+  database_security:
+    ssl_mode: "require"
+    connection_encryption: true
+    query_logging: false         # Disable in production
+    
+  # Cache security
+  cache_security:
+    auth_required: true
+    ssl_enabled: true
+    
+  # Secrets management
+  secrets:
+    provider: "environment"      # environment, vault, aws_secrets
+    encryption_key: "${ENCRYPTION_KEY}"
+
+# Deployment Configuration
+deployment:
+  # Environment
+  environment: "${ENVIRONMENT:development}"  # development, staging, production
+  
+  # Scaling
+  scaling:
+    auto_scaling: false
+    min_instances: 2
+    max_instances: 10
+    target_cpu: 70               # CPU utilization target %
+    target_memory: 80            # Memory utilization target %
+    
+  # Resource limits
+  resources:
+    cpu_limit: "2000m"           # 2 CPU cores
+    memory_limit: "4Gi"          # 4 GB RAM
+    storage_limit: "100Gi"       # 100 GB storage
+    
+  # Health checks
+  health:
+    liveness_probe: "/health"
+    readiness_probe: "/ready"
+    startup_probe: "/startup"
+    
+# Migration Configuration
+migration:
+  # Database migration settings
+  database_migration:
+    enabled: false
+    source_type: "sqlite"
+    target_type: "postgresql"
+    
+    # Migration strategy
+    strategy: "online"           # online, offline
+    chunk_size: 10000           # Records per migration chunk
+    parallel_chunks: 2
+    validation_enabled: true
+    
+    # Rollback configuration
+    rollback:
+      enabled: true
+      backup_before_migration: true
+      rollback_timeout: 3600    # 1 hour
+      
+  # Zero-downtime migration
+  zero_downtime:
+    enabled: false
+    dual_write: true            # Write to both databases
+    read_from_new: false        # Read from new database
+    verification_percentage: 10  # Verify 10% of writes

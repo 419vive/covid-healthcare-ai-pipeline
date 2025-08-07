@@ -1,0 +1,156 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veeva-dq-app
+  namespace: veeva-dq-system
+  labels:
+    app.kubernetes.io/name: veeva-data-quality-system
+    app.kubernetes.io/component: application
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: veeva-data-quality-system
+      app.kubernetes.io/component: application
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: veeva-data-quality-system
+        app.kubernetes.io/component: application
+        app.kubernetes.io/version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: veeva-dq-service-account
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+      containers:
+      - name: veeva-dq-app
+        image: veeva-dq:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: metrics
+          protocol: TCP
+        - containerPort: 8001
+          name: health
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: veeva-dq-config
+        - secretRef:
+            name: veeva-dq-secrets
+        env:
+        - name: VEEVA_DB_PATH
+          value: "/app/data/database/veeva_opendata.db"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: reports-volume
+          mountPath: /app/reports
+        - name: config-volume
+          mountPath: /app/config
+        - name: scripts-volume
+          mountPath: /app/scripts
+        - name: tmp-volume
+          mountPath: /tmp
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - /app/scripts/health-check.sh
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - /app/scripts/health-check.sh
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          exec:
+            command:
+            - /bin/bash
+            - /app/scripts/health-check.sh
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: veeva-dq-data-pvc
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: veeva-dq-logs-pvc
+      - name: reports-volume
+        persistentVolumeClaim:
+          claimName: veeva-dq-reports-pvc
+      - name: config-volume
+        emptyDir: {}
+      - name: scripts-volume
+        configMap:
+          name: veeva-dq-scripts
+          defaultMode: 0755
+      - name: tmp-volume
+        emptyDir: {}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - key: "app"
+        operator: "Equal"
+        value: "veeva-dq"
+        effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - veeva-data-quality-system
+              topologyKey: kubernetes.io/hostname

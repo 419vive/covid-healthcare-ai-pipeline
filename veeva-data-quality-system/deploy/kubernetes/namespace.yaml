@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: veeva-dq-system
+  labels:
+    name: veeva-dq-system
+    environment: production
+    app.kubernetes.io/name: veeva-data-quality-system
+    app.kubernetes.io/version: "1.0.0"
+  annotations:
+    description: "Veeva Data Quality System namespace for production deployment"

@@ -1,0 +1,55 @@
+
+=== VEEVA DATA QUALITY SYSTEM - INFRASTRUCTURE STATUS REPORT ===
+Generated: 2025-08-07T22:10:02.122836
+Overall Status: DEGRADED
+Performance Score: 100/100 (EXCELLENT)
+
+SYSTEM OVERVIEW:
+- CPU Usage: 31.9%
+- Memory Usage: 69.1%
+- Disk Usage: 2.3% (4.9GB free)
+- Total Database Size: 0.1MB
+
+CONTAINER STATUS:
+- Docker Status: SUCCESS
+- Running Containers: 3
+
+DATABASE HEALTH:
+- Status: HEALTHY
+- Databases Found: 2
+- Performance Test: 2.3ms
+
+MONITORING SYSTEMS:
+- Infrastructure Monitor: NOT_STARTED
+- Prometheus: RUNNING
+- Grafana: RUNNING
+
+LOG ANALYSIS:
+- Total Log Files: 6
+- Total Log Size: 0.0MB
+- Recent Errors: 4
+
+PERFORMANCE BOTTLENECKS (0):
+- No significant bottlenecks detected
+
+ACTIVE ALERTS (2):
+- LOW DISK SPACE: 4.9GB < 5.0GB
+- Resource usage high: memory_percent = 68.8% (baseline: 40.0%)
+
+RECOMMENDATIONS (3):
+- Performance optimization needed
+- LOW DISK SPACE: 4.9GB free - Clean up files
+- Start infrastructure monitoring system
+
+DATABASE DETAILS:
+- metrics.db: 0.0MB, 5 tables
+  Total records: 0
+- infrastructure_monitoring.db: 0.0MB, 4 tables
+  Total records: 0
+
+CONTAINER DETAILS:
+- veeva-data-quality-system: running (Up 27 minutes (healthy))
+- veeva-prometheus: running (Up 33 minutes)
+- veeva-grafana: running (Up 33 minutes)
+
+=== END REPORT ===

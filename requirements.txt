@@ -1,0 +1,28 @@
+# COVID-19 Research Analysis Pipeline Requirements
+# Data manipulation and analysis
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Visualization libraries
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Statistical analysis
+scipy>=1.8.0
+scikit-learn>=1.1.0
+
+# Text processing
+re
+collections
+datetime
+json
+pathlib
+
+# Jupyter notebook support (optional)
+jupyter>=1.0.0
+ipykernel>=6.0.0
+
+# Additional utilities
+warnings
+os

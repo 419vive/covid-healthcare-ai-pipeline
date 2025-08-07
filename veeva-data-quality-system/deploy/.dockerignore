@@ -1,0 +1,46 @@
+# Git and development files
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.coverage
+.tox
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development files
+dev-requirements.txt
+tests/
+docs/development/
+
+# Logs and temporary files
+logs/*
+reports/*
+*.log
+*.tmp
+
+# Local configuration
+.env.local
+.env.dev
+config/local_*
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Database files (will be mounted in production)
+data/database/*.db
+data/database/*.db-*

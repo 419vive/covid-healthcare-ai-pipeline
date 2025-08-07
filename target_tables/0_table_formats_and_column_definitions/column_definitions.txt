@@ -1,0 +1,301 @@
+General Remarks: 
+
+
+If a study has multiple findings these findings are split in multiple rows (e.g. What is the evidence that domesticated/farm animals can be infected and maintain transmissibility of the disease? ): 
+
+
+Split by described factors/ factor combinations:
+* all #2 layouts
+
+
+Split by patient groups (age groups, symptoms, disease severity):
+* all #3 layouts 
+except:
+1. How does viral load relate to disease presentation which includes likelihood of a positive diagnostic test?
+2. What is the knowledge of the frequency, manifestations, and course of extrapulmonary manifestations of COVID-19, including, but not limited to, possible cardiomyopathy and cardiac arrest?
+
+
+Split by material: 
+   * all #5 layouts
+
+
+Split by detection method: 
+   * all #6 layouts
+
+
+Split by sample obtained: 
+   * How does viral load relate to disease presentation which includes likelihood of a positive diagnostic test?
+
+
+Split by Manifestations column: 
+   * What is the knowledge of the frequency, manifestations, and course of extrapulmonary manifestations of COVID-19, including, but not limited to, possible cardiomyopathy and cardiac arrest?
+
+
+If multiple values per cell are reported they get  “;” - seperated.
+
+
+If a value value is not applicable/ not described it is marked with “-”.
+
+
+Long text answers are always reported as excerpts from the original text.
+
+
+In order to make the tables standardised and informative we have included dummy variables in 2 table formats (#2 Describing Patient Characteristics, #5 Describing Materials), that are different from table to table (Property1; Property2; Characteristic Related to Question 1/ Characteristic Related to Question 2). If only 1 of these columns is needed by the curator to answer the question the 2nd one is still included as a dummy column.
+
+
+
+
+Column Definitions:
+
+
+Addressed Population: 
+
+
+The population the studies findings is addressing. This can range from nursing staff to homeless to prisoners, which all have their own needs in the pandemic.
+
+
+This column is an excerpt from the study.
+
+
+Challenge:
+
+
+The challenge the addressed population is facing.
+
+
+This column is an excerpt from the study.
+
+
+Solution:
+
+
+The solution to the challenge the addressed population is facing in the pandemic.
+
+
+This column is an excerpt from the study.
+
+
+Sample obtained: 
+
+
+The sample that is obtained to test for a coronavirus infection. Most commonly Nasopharyngeal swabs are obtained, but also other swabs are evaluated. The sample is then analyzed for the presence of organisms or other clinical markers for disease (look at diagnosis tables for more information on the analysis of samples)
+
+
+Possible obtained swabs by now: 
+
+
+Nasal, Throat, Conjunctival, Nasopharyngeal, Oropharyngeal, broncho-alveolar lavage, Sputum, Respiratory tract, Blood, Semen, Fecal Matter, GI tract (Gastrointestinal tract), Rectal, Anal
+
+
+This is a categorical variable.
+
+
+Severity of Disease:
+
+
+The severity of symptoms the cohort displays. 
+
+Possible values: Mild, Moderate, Severe, Varied, ICU, non-ICU
+
+
+This column uses the definition used in the study and is only reported when these words are used in the study. There are no uniform definitions for the different types of severity yet.
+
+
+This is a categorical variable.
+
+Sample: 
+
+
+Only used in tables regarding patients.
+Reports how many patients are included in the study.
+
+
+If the study is a meta analysis/ review this study additionally includes the number of studies/articles used for the review.
+
+
+Factors: 
+
+
+A categorical variable different in every table. 
+For examples factors related to Seasonality: Temperature; Solar Radiation, Population Density, Precipitation
+
+
+Influential:
+Whether the factor is influential to the questions answer. 
+
+
+Y: the factor is influential to the questions answer. 
+N: the factor is not influential to the questions answer. 
+
+
+This is a binary variable. (Y = Yes, N = No)
+
+
+Excerpt:
+This column is a more detailed explanation of the Influential column. 
+This column is an excerpt from the study.
+
+
+Age:
+All parameters regarding the age of the given cohort (mean, median, iqr, range) reported in the study.
+
+
+Speed of assay:
+How long the assay is taking for the analysis.
+reported in: realtime, x mins, x hours, x days in the way the study reports on this.
+
+
+FDA approval:
+Weather the tool has been FDA approved.
+
+
+Y: FDA approved
+N: not FDA approved
+
+
+This is a binary variable. (Y = Yes, N = No)
+
+
+Method: 
+The method used in this study. In modeling studies the model that has been used (e.g.) and in genetic related questions the extraction method that has been used (e.g.)
+
+
+Result:
+The findings of the study related to the question
+
+
+Material
+The material that is described in the study, which properties are described. Materials currently are decontamination agents, sheddings routes (equal to sample obtained), surfaces.
+
+
+Measure of Evidence
+This column was introduced as a analogon to the sample size column in patient related tables for more broader formulated questions where not all studies are patient related. It describes whatever gives the study validity.
+
+
+studies with patients (e.g. What do we know about viral shedding in stool?): 
+
+
+How many patients (patients: 217); How many studies in review/meta analysis studies (studies: 116); Severity of Symptoms (severity: severe)
+
+
+Modeling studies (e.g. Seasonality of transmission): 
+
+
+Model used (model: SEIR); Countries modeled (countries: China); cities modeled (cities: Wuhan); provinces modeled (provinces: 90); Number of countries modeled (countries: 16); Population size modeled (people: 824000 / cases: 210 / patients: 8137)
+
+
+Confirmation by Method (e.g. What is the evidence that domesticated/farm animals can be infected and maintain transmissibility of the disease? ):
+
+
+What method has been used to confirm the findings (detection: PCR-confirmed)
+
+
+Confirmation by Survey (e.g. Methods to control the spread in communities, barriers to compliance and how these vary among different populations):
+
+
+How many participants were included in the study (participants: 316)
+
+
+Therapeutic method(s) utilized/assessed:
+Medications to treat patients.
+
+
+This column is an excerpt from the study.
+
+
+General Outcome/Conclusion Excerpt
+This column is an excerpt from the study.
+
+
+Primary Endpoint(s) of Study
+The primary measurement of outcome.
+
+
+This column is an excerpt from the study.
+
+
+Clinical Improvement (Y/N)
+A short version of the General Outcome/Conclusion Excerpt.
+
+
+Y: significant clinical improved by the utilized Therapeutic method
+N: no significant clinical improved by the utilized Therapeutic method
+
+
+This is a binary variable. (Y = Yes, N = No)
+
+
+Measure of Testing Accuracy
+Any measurement that reflects the accuracy of the test. Most meaningful are sensitivity and specificity values, but all measures are included in this column. (sensitivity: 98%; specificity: 85%; ...)
+
+
+Property 1 / Property 2
+
+
+Wild card column, this columns name is decided by the curator and on an individual table level. 
+With new tables new columns may be added.
+
+
+Possible columns currently: 
+   1. Asymptomatic
+Percentage of patients that do not show symptoms
+
+
+   2. Asymptomatic Transmission
+The percentage of people that were infected during the asymptomatic stage of the person infecting them.
+        
+   3. Days
+The median and mean incubation periods. Incubation period refers to the time from infection to first symptoms.
+        
+   4. Range (Days)
+any measurement related to the range of the incubation period (range, percentile. IQR). Incubation period refers to the time from infection to first symptoms.
+
+
+
+
+
+
+
+Characteristic Related to Question 1/ Characteristic Related to Question 2:
+
+
+Wild card column, this columns name is decided by the curator and on an individual table level.
+With new tables new columns may be added.
+
+
+Possible columns currently: 
+
+
+   1. Days After Admission
+mean, median and range of days the virus is still detectable in the sample after admission
+
+
+   2. Days After Onset
+mean, median and range of days the virus is still detectable in the sample after onset
+
+
+   3. TCID50
+Tissue Culture Infection Dose 50 is the concentration at which 50% of the cells are infected in a cell culture.
+
+
+   4. Persistence
+The maximum time the virus can be detectable in the material
+
+
+   5. Half-life
+Time until the detectable quantitiy of the virus is reduced to half of its original quantity.
+
+
+
+
+Detection Method
+Which method has been used to detect infections. 
+This column is a short excerpt from the study.
+
+
+This column is an excerpt from the study.
+
+
+Definitions: 
+Cases: infected people
+Patients: cases receiving care in the hospital

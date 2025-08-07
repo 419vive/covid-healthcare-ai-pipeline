@@ -1,0 +1,204 @@
+# Prometheus Alert Rules for Veeva Data Quality System
+groups:
+  - name: veeva_system_alerts
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: cpu_usage_percent > 80
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-dq-system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% for more than 2 minutes"
+
+      - alert: CriticalCPUUsage
+        expr: cpu_usage_percent > 90
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-dq-system
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "CPU usage is {{ $value }}% for more than 1 minute"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: memory_usage_percent > 85
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-dq-system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% for more than 2 minutes"
+
+      - alert: CriticalMemoryUsage
+        expr: memory_usage_percent > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-dq-system
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value }}% for more than 1 minute"
+
+      # Low Disk Space
+      - alert: LowDiskSpace
+        expr: disk_free_gb < 5
+        for: 1m
+        labels:
+          severity: warning
+          service: veeva-dq-system
+        annotations:
+          summary: "Low disk space warning"
+          description: "Only {{ $value }}GB of disk space remaining"
+
+      - alert: CriticalDiskSpace
+        expr: disk_free_gb < 1
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-dq-system
+        annotations:
+          summary: "Critical disk space alert"
+          description: "Only {{ $value }}GB of disk space remaining"
+
+  - name: veeva_database_alerts
+    rules:
+      # Slow Database Queries
+      - alert: SlowDatabaseQueries
+        expr: database_query_time_ms > 500
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-database
+        annotations:
+          summary: "Database queries are slow"
+          description: "Average query time is {{ $value }}ms for more than 2 minutes"
+
+      - alert: CriticalDatabaseQueries
+        expr: database_query_time_ms > 1000
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-database
+        annotations:
+          summary: "Database queries are critically slow"
+          description: "Average query time is {{ $value }}ms for more than 1 minute"
+
+      # Database Connection Issues
+      - alert: DatabaseConnectionFailure
+        expr: database_connected == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: veeva-database
+        annotations:
+          summary: "Database connection failed"
+          description: "Unable to connect to the database for more than 30 seconds"
+
+  - name: veeva_application_alerts
+    rules:
+      # Application Endpoint Down
+      - alert: ApplicationEndpointDown
+        expr: endpoint_available == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-application
+        annotations:
+          summary: "Application endpoint is down"
+          description: "{{ $labels.endpoint }} has been unavailable for more than 1 minute"
+
+      # High Response Time
+      - alert: HighResponseTime
+        expr: endpoint_response_time_ms > 2000
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-application
+        annotations:
+          summary: "High application response time"
+          description: "{{ $labels.endpoint }} response time is {{ $value }}ms for more than 2 minutes"
+
+      # Data Quality Issues
+      - alert: DataQualityDegradation
+        expr: data_quality_score < 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: veeva-data-quality
+        annotations:
+          summary: "Data quality score has degraded"
+          description: "Overall data quality score is {{ $value }} for more than 5 minutes"
+
+      - alert: CriticalDataQualityIssues
+        expr: critical_data_issues > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: veeva-data-quality
+        annotations:
+          summary: "Critical data quality issues detected"
+          description: "{{ $value }} critical data quality issues detected"
+
+  - name: veeva_security_alerts
+    rules:
+      # Failed Authentication Attempts
+      - alert: HighFailedAuthAttempts
+        expr: failed_auth_attempts > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: veeva-security
+        annotations:
+          summary: "High number of failed authentication attempts"
+          description: "{{ $value }} failed authentication attempts in 5 minutes"
+
+      # Security Scan Issues
+      - alert: SecurityVulnerabilities
+        expr: security_vulnerabilities > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: veeva-security
+        annotations:
+          summary: "Security vulnerabilities detected"
+          description: "{{ $value }} security vulnerabilities found in the system"
+
+  - name: veeva_container_alerts
+    rules:
+      # Container Down
+      - alert: ContainerDown
+        expr: container_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: veeva-containers
+        annotations:
+          summary: "Container is down"
+          description: "Container {{ $labels.container }} has been down for more than 1 minute"
+
+      # High Container Resource Usage
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes / container_memory_limit_bytes > 0.9
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-containers
+        annotations:
+          summary: "Container memory usage is high"
+          description: "Container {{ $labels.container }} memory usage is {{ $value | humanizePercentage }}"
+
+      # Container Restart Loop
+      - alert: ContainerRestartLoop
+        expr: increase(container_restart_total[10m]) > 3
+        for: 2m
+        labels:
+          severity: warning
+          service: veeva-containers
+        annotations:
+          summary: "Container is restarting frequently"
+          description: "Container {{ $labels.container }} has restarted {{ $value }} times in 10 minutes"

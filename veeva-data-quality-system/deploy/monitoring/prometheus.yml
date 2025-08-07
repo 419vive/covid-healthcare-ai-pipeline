@@ -1,0 +1,59 @@
+# Prometheus Configuration for Veeva Data Quality System
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Veeva Data Quality System metrics
+  - job_name: 'veeva-dq-system'
+    static_configs:
+      - targets: ['veeva-dq-app:8000']  # Assuming we add metrics endpoint
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    
+  # System node metrics (if node_exporter is available)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Database metrics (SQLite exporter if available)
+  - job_name: 'sqlite-exporter'
+    static_configs:
+      - targets: ['sqlite-exporter:9103']
+    scrape_interval: 60s
+
+  # Custom health check endpoint
+  - job_name: 'veeva-health-check'
+    static_configs:
+      - targets: ['veeva-dq-app:8001']  # Health check endpoint
+    scrape_interval: 30s
+    metrics_path: '/health/metrics'
+    
+  # Application-specific metrics
+  - job_name: 'veeva-app-metrics'
+    static_configs:
+      - targets: ['veeva-dq-app:8002']  # Application metrics endpoint
+    scrape_interval: 60s
+    metrics_path: '/app/metrics'
+    
+# Remote write configuration (optional, for long-term storage)
+# remote_write:
+#   - url: "https://your-remote-prometheus.com/api/v1/write"
+#     basic_auth:
+#       username: "username"
+#       password: "password"

@@ -1,0 +1,124 @@
+# Veeva Data Quality System Configuration
+# This file defines the configuration for the data quality pipeline
+
+# Database Configuration
+database:
+  path: "data/database/veeva_opendata.db"
+  echo_sql: false
+  connection_timeout: 30
+  
+# Data Quality Configuration
+quality_checks:
+  enabled: true
+  parallel_execution: true
+  max_workers: 4
+  batch_size: 10000
+  
+  # Quality thresholds
+  thresholds:
+    completeness_minimum: 95.0    # Minimum completeness percentage
+    consistency_minimum: 90.0     # Minimum consistency percentage  
+    accuracy_minimum: 95.0        # Minimum accuracy percentage
+    timeliness_maximum_days: 30    # Maximum data age in days
+    uniqueness_minimum: 99.0      # Minimum uniqueness percentage
+    
+  # Validation rules configuration
+  validation_rules:
+    provider_name_inconsistency:
+      enabled: true
+      confidence_threshold: 75
+      severity: "HIGH"
+      
+    npi_validation:
+      enabled: true
+      check_format: true
+      check_duplicates: true
+      severity: "CRITICAL"
+      
+    affiliation_anomaly:
+      enabled: true
+      max_facilities_p95: true  # Use 95th percentile as threshold
+      multi_state_flag: true
+      severity: "MEDIUM"
+      
+    temporal_consistency:
+      enabled: true
+      check_age_ranges: true
+      check_career_timeline: true
+      severity: "HIGH"
+      
+    cross_reference_integrity:
+      enabled: true
+      check_orphaned_records: true
+      severity: "CRITICAL"
+
+# Reporting Configuration
+reporting:
+  output_directory: "reports"
+  formats: ["xlsx", "html", "json"]
+  include_charts: true
+  
+  # Report templates
+  templates:
+    daily_quality_report: "templates/daily_report.html"
+    executive_summary: "templates/executive_summary.html"
+    detailed_analysis: "templates/detailed_analysis.html"
+
+# Logging Configuration  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_path: "logs/veeva_dq.log"
+  max_file_size_mb: 10
+  backup_count: 5
+  console_output: true
+
+# Performance Configuration
+performance:
+  query_timeout_seconds: 300
+  memory_limit_mb: 2048
+  enable_query_profiling: false
+  cache_query_results: true
+  cache_ttl_seconds: 3600
+
+# Business Rules Configuration
+business_rules:
+  max_provider_facilities: 5
+  max_monthly_activities: 50
+  min_career_years: 1
+  max_career_years: 60
+  min_graduation_age: 22
+  max_graduation_age: 40
+  
+  # Specialty-specific rules
+  specialty_rules:
+    "Family Medicine":
+      typical_facilities: 2
+      max_patients_per_day: 30
+    "Emergency Medicine": 
+      typical_facilities: 3
+      max_patients_per_day: 50
+    "Surgery":
+      typical_facilities: 1
+      max_patients_per_day: 10
+
+# Data Processing Configuration
+processing:
+  chunk_size: 50000  # Records per processing chunk
+  enable_parallel_processing: true
+  max_parallel_workers: 4
+  temporary_table_prefix: "tmp_veeva_"
+  
+  # ETL Configuration
+  etl:
+    extract_batch_size: 10000
+    transform_batch_size: 5000  
+    load_batch_size: 1000
+    enable_incremental_processing: true
+    
+# Feature Flags
+features:
+  enable_advanced_analytics: true
+  enable_ml_anomaly_detection: false  # Future feature
+  enable_real_time_monitoring: false  # Future feature
+  enable_api_endpoints: false         # Future feature
