@@ -76,3 +76,8 @@ npm-debug.log*
 # Embedded git repositories (subprojects)
 agents/
 serena/
+
+# Large database files
+*.db
+*.db-shm 
+*.db-wal
