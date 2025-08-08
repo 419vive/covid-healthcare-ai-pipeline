@@ -52,7 +52,7 @@ Thumbs.db
 node_modules/
 npm-debug.log*
 
-# Large data files (keep smaller examples)
+# Large data files (keep smaller examples, but allow important results)
 *.zip
 *.tar.gz
 *.csv
@@ -60,9 +60,18 @@ npm-debug.log*
 *.png
 *.html
 
-# Personal files
+# Allow important result files
+!covid19_research_summary.txt
+!enhanced_analysis_execution_summary.txt
+!Cover_Letter_Veeva_Data_Analyst.txt
+!Resume_Veeva_Data_Analyst.txt
+
+# Personal files (except important resume/application files)
 *linkedin*
 *.pdf
+!HoChulai_Veeva_DataAnalyst_Resume.pdf
+!*resume*.pdf
+!*Resume*.pdf
 
 # Jupyter Notebook
 .ipynb_checkpoints
